@@ -60,7 +60,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   //check division by zero
   if(fabs(c1) < 0.0001){
   	cout << "CalculateJacobian () - Error - Division by Zero" << endl;
-		return Hj;
+		return MatrixXd::Ones(3,4);;
   }
 
   //compute the Jacobian matrix
@@ -70,12 +70,6 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
   // return jacobian
   return Hj;
-}
-
-VectorXd Tools::ConvertPolarIntoCartesian(const VectorXd& x_polar){
-
-	VectorXd x_cart = VectorXd::Zero(4);
-	return x_cart;
 }
 
 VectorXd Tools::ConvertCartesianIntoPolar(const VectorXd& x_cart){

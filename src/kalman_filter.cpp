@@ -12,16 +12,20 @@ KalmanFilter::~KalmanFilter() {}
 
 void KalmanFilter::Init(const VectorXd &x_in) {
 
+  // Set dimensions
   number_of_states_ = x_in.size();
   number_of_laser_observations_ = 2;
   number_of_radar_observations_ = 3;
 
+  // Store initial state vector and covariance
   x_ = x_in;
   P_ = MatrixXd::Zero(number_of_states_,number_of_states_);
   P_ << 1000, 0, 0, 0,
         0, 1000, 0, 0,
         0, 0,   10, 0,
         0, 0,    0,10;
+
+  // Set other matrices
   F_ = MatrixXd::Identity(number_of_states_,number_of_states_);
   H_ = MatrixXd::Identity(number_of_laser_observations_,number_of_states_);
   Q_ = MatrixXd::Zero(number_of_states_,number_of_states_);
@@ -32,9 +36,9 @@ void KalmanFilter::Init(const VectorXd &x_in) {
   R_radar_ << 0.09, 0, 0,
         0, 0.0009, 0,
         0, 0, 0.09;
-
   I_ = MatrixXd::Identity(number_of_states_, number_of_states_);
 
+  // Construct tool object
   tools = Tools();
 
 
@@ -43,20 +47,17 @@ void KalmanFilter::Init(const VectorXd &x_in) {
   noise_ay_ = 9.0;
 
   // Print initial matrixes
-  cout << "INIT" << endl;
-  cout << "x_ " << endl << x_ << endl;
-  cout << "P_ " << endl << P_ << endl;
-  cout << "F_ " << endl << F_ << endl;
-  cout << "H_ " << endl << H_ << endl;
-  cout << "Q_ " << endl << Q_ << endl;
-  cout << "R_laser " << endl << R_laser_ << endl;
+  // cout << "INIT" << endl;
+  // cout << "x_ " << endl << x_ << endl;
+  // cout << "P_ " << endl << P_ << endl;
+  // cout << "F_ " << endl << F_ << endl;
+  // cout << "H_ " << endl << H_ << endl;
+  // cout << "Q_ " << endl << Q_ << endl;
+  // cout << "R_laser " << endl << R_laser_ << endl;
 }
 
 void KalmanFilter::Predict(const float delta_T) {
-  /**
-  TODO:
-    * predict the state
-  */
+
   //update state prediction matrix F
   F_(0,2) = delta_T;
   F_(1,3) = delta_T;
@@ -78,10 +79,6 @@ void KalmanFilter::Predict(const float delta_T) {
 
   //predict state covariance
   P_ = F_ * P_ * F_.transpose() + Q_;
-
-  // print predicted state
-  //cout << "x_pred " << endl << x_ << endl;
-  //cout << "P_pred " << endl << P_ << endl;
 }
 
 void KalmanFilter::Update(const Eigen::VectorXd &z){
@@ -115,22 +112,14 @@ void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z){
   //cout << "JH " << endl << JH << endl;
 
   VectorXd z_pred = tools.ConvertCartesianIntoPolar(x_);
-  cout << "z_pred " << endl << z_pred << endl;
-  cout << "z_ " << endl << z << endl;
+  // cout << "z_pred " << endl << z_pred << endl;
+  // cout << "z_ " << endl << z << endl;
 
-  // check if z is between pi and -pi
+  // Sanity check if orientation offset is too big
   VectorXd y = z - z_pred;
-  if(z(1)>M_PI){
-    cout << "ERROR" << endl << endl << endl;
-    y(1) = y(1) - 2 * M_PI;
-    cout << y << endl;
+  if(y(1)>M_PI){
+    y(1) -= 2 * M_PI;
   }
-  else if(z(1)<-M_PI){
-    cout << "ERROR2" << endl << endl << endl;
-    //y(1) = y(1) + 2 * M_PI;
-    cout << y << endl;
-  }
-
 
   //cout << "y_ " << endl << y << endl;
   MatrixXd JHt = JH.transpose();

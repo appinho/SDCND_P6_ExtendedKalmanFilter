@@ -56,11 +56,6 @@ public:
   /**
    * Init Initializes Kalman filter
    * @param x_in Initial state
-   * @param P_in Initial state covariance
-   * @param F_in Transition matrix
-   * @param H_in Measurement matrix
-   * @param R_in Measurement covariance matrix
-   * @param Q_in Process covariance matrix
    */
   void Init(const Eigen::VectorXd &x_in);
 
